@@ -10,7 +10,9 @@ const topButton = document.getElementById('topBtn'); // Get Back To Top button
 
 // parameters
 const users = []; // store users
+const favoriteList = JSON.parse(localStorage.getItem('favoriteUsers')) || []; // get favorite list
 let filteredUsers = []; // store filtered users
+let currentPage = 1;
 
 function scrollFunction() {
   if (
@@ -32,6 +34,20 @@ function topFunction() {
 // functions
 function renderUserList(data) {
   let rowHTML = '';
+  let idList = [];
+
+  // filter user id from favorite list
+  if (favoriteList) {
+    for (let i = 0; i < data.length; i++) {
+      for (let j = 0; j < favoriteList.length; j++) {
+        if (data[i].id === favoriteList[j].id) {
+          idList.push(favoriteList[j].id);
+        }
+      }
+    }
+  }
+
+  // render user list
   data.forEach((item) => {
     rowHTML += `
     <div class="col-sm-3">
@@ -43,14 +59,20 @@ function renderUserList(data) {
             alt="User Poster"
           />
           <div class="card-body">
-            <h5 class="card-title fw-bolder mb-4">${item.name} ${item.surname}</h5>
+            <h5 class="card-title fw-bolder mb-4">${item.name} ${
+      item.surname
+    }</h5>
             <button
               class="btn btn-primary btn-sm btn-show-user"
               data-bs-toggle="modal"
               data-bs-target="#user-modal"
               data-id="${item.id}">Info</button>
-            <button class="btn btn-secondary btn-sm  btn-add-favorite"
-              data-id="${item.id}">+</button>
+            <button class="btn ${
+              idList.find((id) => id === item.id)
+                ? 'btn-danger'
+                : 'btn-secondary'
+            } btn-sm btn-add-favorite"
+              data-id="${item.id}">Like</button>
           </div>
         </div>
       </div>
@@ -88,15 +110,27 @@ function showUserModal(id) {
 }
 
 function addToFavorite(id) {
-  const list = JSON.parse(localStorage.getItem('favoriteUsers')) || []; // get favorite list
   const user = users.find((user) => user.id === id); // find user by id
 
   // update list and local storage
-  if (list.some((user) => user.id === id)) {
-    return alert('此用戶已在最愛名單中！');
+  if (favoriteList.some((user) => user.id === id)) {
+    const index = favoriteList.findIndex((user) => user.id === id);
+    favoriteList.splice(index, 1);
+    // return alert('此用戶已在最愛名單中！');
+  } else {
+    favoriteList.push(user);
   }
-  list.push(user);
-  localStorage.setItem('favoriteUsers', JSON.stringify(list));
+  localStorage.setItem('favoriteUsers', JSON.stringify(favoriteList));
+}
+
+function changeFavoriteBtnStyle(btn) {
+  if (btn.matches('.btn-secondary')) {
+    btn.classList.remove('btn-secondary');
+    btn.classList.add('btn-danger');
+  } else {
+    btn.classList.remove('btn-danger');
+    btn.classList.add('btn-secondary');
+  }
 }
 
 function getUsersByPage(page) {
@@ -115,6 +149,7 @@ function renderPaginator(amount) {
   }
 
   paginator.innerHTML = rawHTML;
+  paginator.firstElementChild.classList.add('active');
 }
 
 // 1. Get users data and render html
@@ -134,6 +169,7 @@ dataPanel.addEventListener('click', function (e) {
   } else if (e.target.matches('.btn-add-favorite')) {
     // 4. add favorite user
     addToFavorite(Number(e.target.dataset.id));
+	changeFavoriteBtnStyle(e.target);
   }
 });
 
@@ -167,9 +203,15 @@ paginator.addEventListener('click', function (e) {
     return;
   }
 
-  const page = Number(e.target.dataset.page);
+  // remove .active from old page
+  const activeLi = document.querySelector('.active');
+  activeLi.classList.remove('active');
 
-  renderUserList(getUsersByPage(page));
+  // add .active to new page
+  currentPage = Number(e.target.dataset.page);
+  e.target.parentElement.classList.add('active');
+
+  renderUserList(getUsersByPage(currentPage));
 });
 
 // 6. When the user scrolls down 100px from the top of the document, show the button

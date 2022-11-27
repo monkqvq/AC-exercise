@@ -52,7 +52,7 @@ function showUserModal(id) {
 
   // get user info and set model
   axios
-    .get(BASE_URL)
+    .get(BASE_URL+id)
     .then((res) => {
       const data = res.data;
       modalTitle.innerText = `${data.name} ${data.surname}`;
@@ -76,7 +76,11 @@ function removeFromFavorite(id) {
 
   // set local storage and refresh html
   localStorage.setItem('favoriteUsers', JSON.stringify(users));
-  renderPaginator(users.length);
+
+  // Delete last page. When subtracting one user, the number of users on the last page is zero.
+  if (users.length % USERS_PER_PAGE === 0) {
+    renderPaginator(users.length);
+  }
   renderUserList(getUsersByPage(currentPage));
 }
 
@@ -95,6 +99,21 @@ function renderPaginator(amount) {
   }
 
   paginator.innerHTML = rawHTML;
+
+  const pageItem = document.querySelectorAll('.page-item');
+  // 如果在最後一頁，且刪光該頁最愛名單，current page 會往前跳一頁
+  if (
+    users.length % USERS_PER_PAGE === 0 &&
+    currentPage - 1 === pageItem.length
+  ) {
+    currentPage -= 1;
+  }
+  // Add .active class
+  pageItem.forEach((item, index) => {
+    if (index + 1 === currentPage) {
+      item.classList.add('active');
+    }
+  });
 }
 
 // 1. Get favorite users data and render html
@@ -116,7 +135,12 @@ paginator.addEventListener('click', function (e) {
   if (e.target.tagName !== 'A') {
     return;
   }
+  // remove .active from old page
+  const active = document.querySelector('.active');
+  active.classList.remove('active');
+  // add .active to new page
   currentPage = Number(e.target.dataset.page);
+  e.target.parentElement.classList.add('active');
 
   renderUserList(getUsersByPage(currentPage));
 });
