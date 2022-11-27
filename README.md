@@ -1,5 +1,5 @@
 # AC-exercise
-This repo is used to record simple web applications for AC exercises.
+This repo is used to store simple web applications for AC exercises.
 ## Page Demo
 | No  | Project     | Link
 | --- | ----------- | -------------
@@ -15,15 +15,16 @@ This repo is used to record simple web applications for AC exercises.
 - Submit order.
 ### User list
 - Show user profile.
-- Search user by name or surname.
-- **Easy to manage favorite list.**
+- Searching users by name or surname.
+- Add/remove users to/from your favorite list on index page.
+- Press `x` to remove user from favorite list on favorite page.
 ### Movie list
-- Show movie introduction.
-- Search movie by title.
-- Add movie to favorite list in homepage.
-- Remove favorite movie from favorite list in favorite page.
+- Listing movies from movie api.
+- Searching movies by title.
+- Add movies to your favorite list on index page.
+- Press `x` to remove movie from favorite list on favorite page.
 - **Switch display mode(card or list).**
 ### Memorizing game
 - Use concept of MVC design.
-- Easily notify when match failed.
+- Easily alert when match failed.
 - Record score and times.
